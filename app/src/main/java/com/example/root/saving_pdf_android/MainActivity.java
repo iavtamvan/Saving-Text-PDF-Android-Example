@@ -118,7 +118,6 @@ public class MainActivity extends AppCompatActivity {
 //                    }
                     createPdf(FileUtils.getAppPath(mContext) + tvWaktuMasuk.getText().toString().trim() + ".pdf");
                 }
-
             }
         });
 
