@@ -4,8 +4,11 @@ import android.app.TimePickerDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.text.format.DateFormat;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -14,15 +17,19 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.example.root.saving_pdf_android.Room.Jurnal;
 import com.example.root.saving_pdf_android.permission.FileUtils;
 import com.example.root.saving_pdf_android.permission.PermissionsActivity;
 import com.example.root.saving_pdf_android.permission.PermissionsChecker;
+import com.facebook.stetho.Stetho;
+import com.facebook.stetho.okhttp3.StethoInterceptor;
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Element;
 import com.itextpdf.text.Font;
+import com.itextpdf.text.Image;
 import com.itextpdf.text.PageSize;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.pdf.BaseFont;
@@ -30,13 +37,21 @@ import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.itextpdf.text.pdf.draw.LineSeparator;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 import java.util.Random;
 
+import okhttp3.OkHttpClient;
+
+import static com.example.root.saving_pdf_android.Room.MyApp.db;
 import static com.example.root.saving_pdf_android.permission.LogUtils.LOGE;
 import static com.example.root.saving_pdf_android.permission.PermissionsActivity.PERMISSION_REQUEST_CODE;
 import static com.example.root.saving_pdf_android.permission.PermissionsChecker.REQUIRED_PERMISSION;
@@ -59,6 +74,17 @@ public class MainActivity extends AppCompatActivity {
     private TextView tvWaktuMasuk;
     private LinearLayout divKetukWaktuKeluar;
     private TextView tvWaktuKeluar;
+    private Date date;
+
+    Jurnal jurnal;
+    private List<Jurnal> jurnals;
+    String dayOfTheWeek;
+    String day;
+    String monthString;
+    String monthNumber;
+    String year;
+    String dateOfDay;
+    private Button btnPrint;
 
 
     @Override
@@ -66,11 +92,24 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initView();
-
         mContext = getApplicationContext();
         checker = new PermissionsChecker(this);
 //        r = (random.nextInt(80) + 65 * 600 - 39);
         calendar = Calendar.getInstance();
+        date = new Date();
+        Stetho.initializeWithDefaults(this);
+        new OkHttpClient.Builder()
+                .addNetworkInterceptor(new StethoInterceptor())
+                .build();
+
+        dayOfTheWeek = (String) DateFormat.format("EEEE", date); // Thursday
+        day = (String) DateFormat.format("dd", date); // 20
+        monthString = (String) DateFormat.format("MM", date); // Jun
+        monthNumber = (String) DateFormat.format("MM", date); // 06
+        year = (String) DateFormat.format("yyyy", date); // 2013
+        dateOfDay = day + "-" + monthString + "-" + year;
+        jurnals = new ArrayList<>();
+
 
         divKetukWaktuMasuk.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -105,7 +144,21 @@ public class MainActivity extends AppCompatActivity {
         btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                jurnal = new Jurnal();
+                jurnal.setWaktu_masuk(tvWaktuMasuk.getText().toString().trim());
+                jurnal.setWaktu_keluar(tvWaktuKeluar.getText().toString().trim());
+                jurnal.setTanggal(dateOfDay);
+                jurnal.setUraian(edtUraian.getText().toString().trim());
+                db.userDao().insertAll(jurnal);
+                tvWaktuMasuk.setText("Ketuk untuk menentukan waktu");
+                tvWaktuKeluar.setText("Ketuk untuk menentukan waktu");
+                edtUraian.setText("");
 
+            }
+        });
+        btnPrint.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
                 if (checker.lacksPermissions(REQUIRED_PERMISSION)) {
                     PermissionsActivity.startActivityForResult(MainActivity.this, PERMISSION_REQUEST_CODE, REQUIRED_PERMISSION);
                 } else {
@@ -142,7 +195,7 @@ public class MainActivity extends AppCompatActivity {
             document.open();
 
             // Document Settings
-            document.setPageSize(PageSize.LEGAL);
+            document.setPageSize(PageSize.LEGAL_LANDSCAPE);
             document.addCreationDate();
             document.addAuthor("Android School");
             document.addCreator("Pratik Butani");
@@ -165,11 +218,38 @@ public class MainActivity extends AppCompatActivity {
 
             // Title Order Details...
             // Adding Title....
-            Font mOrderDetailsTitleFont = new Font(urName, 36.0f, Font.NORMAL, BaseColor.BLACK);
-            Chunk mOrderDetailsTitleChunk = new Chunk("Order Details", mOrderDetailsTitleFont);
+//            Font mOrderDetailsTitleFont = new Font(urName, 36.0f, Font.NORMAL, BaseColor.BLACK);
+//            Chunk mOrderDetailsTitleChunk = new Chunk("Order Details", mOrderDetailsTitleFont);
+//            Paragraph mOrderDetailsTitleParagraph = new Paragraph(mOrderDetailsTitleChunk);
+//            mOrderDetailsTitleParagraph.setAlignment(Element.ALIGN_CENTER);
+//            document.add(mOrderDetailsTitleParagraph);
+
+
+// get input stream
+            InputStream ims = getAssets().open("logo.png");
+            Bitmap bmp = BitmapFactory.decodeStream(ims);
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            bmp.compress(Bitmap.CompressFormat.PNG, 100, stream);
+            Image image = Image.getInstance(stream.toByteArray());
+            image.setAlignment(Element.ALIGN_CENTER);
+            document.add(image);
+
+            Font mOrderDetailsTitleFont = new Font(urName, 12.0f, Font.BOLD, BaseColor.BLACK);
+            Chunk mOrderDetailsTitleChunk = new Chunk(
+                    "KEMENTRIAN HUKUM DAN HAK ASASI MANUSIA REPUBLIK INDONESIA\n"
+                            + "LAPAS TERBUKA KELAS IIB KENDAL\n", mOrderDetailsTitleFont);
             Paragraph mOrderDetailsTitleParagraph = new Paragraph(mOrderDetailsTitleChunk);
             mOrderDetailsTitleParagraph.setAlignment(Element.ALIGN_CENTER);
             document.add(mOrderDetailsTitleParagraph);
+
+
+            Font mOrderDetailsTitleFont1 = new Font(urName, 10.0f, Font.NORMAL, BaseColor.BLACK);
+            Chunk mOrderDetailsTitleChunk1 = new Chunk("JL. RAYA KENDAL BLENDER KM.10", mOrderDetailsTitleFont1);
+            Paragraph mOrderDetailsTitleParagraph1 = new Paragraph(mOrderDetailsTitleChunk1);
+            mOrderDetailsTitleParagraph1.setAlignment(Element.ALIGN_CENTER);
+            document.add(mOrderDetailsTitleParagraph1);
+
+            document.add(new Chunk(lineSeparator));
 
 //            // Fields of Order Details...
 //            // Adding Chunks for Title and value
@@ -218,28 +298,65 @@ public class MainActivity extends AppCompatActivity {
 
 
             // Fields of Order Details...
-            Font mOrderAcNameFont = new Font(urName, mHeadingFontSize, Font.NORMAL, mColorAccent);
-            Chunk mOrderAcNameChunk = new Chunk("JURNAL HARIAN", mOrderAcNameFont);
-            Paragraph mOrderAcNameParagraph = new Paragraph(mOrderAcNameChunk);
-            mOrderAcNameParagraph.setAlignment(Element.ALIGN_CENTER);
-            document.add(mOrderAcNameParagraph);
-            document.add(new Paragraph(""));
+            Font mOrderIdValueFont = new Font(urName, 15.0f, Font.NORMAL, BaseColor.BLACK);
+            Chunk mOrderIdValueChunk = new Chunk("JOURNAL HARIAN", mOrderIdValueFont);
+            Paragraph mOrderIdValueParagraph = new Paragraph(mOrderIdValueChunk);
+            mOrderIdValueParagraph.setAlignment(Element.ALIGN_CENTER);
+            document.add(mOrderIdValueParagraph);
+
+            Font mOrderIdValueFont1 = new Font(urName, 12.0f, Font.NORMAL, BaseColor.BLACK);
+            Chunk mOrderIdValueChunk1 = new Chunk("" + day + "-" + monthString + "-" + year, mOrderIdValueFont1);
+            Paragraph mOrderIdValueParagraph1 = new Paragraph(mOrderIdValueChunk1);
+            mOrderIdValueParagraph1.setAlignment(Element.ALIGN_CENTER);
+            document.add(mOrderIdValueParagraph1);
+
+            Font mOrderIdValueFont11 = new Font(urName, mValueFontSize, Font.NORMAL, BaseColor.BLACK);
+            Chunk mOrderIdValueChunk11 = new Chunk("      ", mOrderIdValueFont11);
+            Paragraph mOrderIdValueParagraph11 = new Paragraph(mOrderIdValueChunk11);
+            mOrderIdValueParagraph11.setAlignment(Element.ALIGN_CENTER);
+            document.add(mOrderIdValueParagraph11);
+
+            // Adding Line Breakable Space....
             document.add(new Paragraph(""));
 
+            // Proses select databases
 
             PdfPTable tabel = new PdfPTable(4);
+            tabel.setPaddingTop(100.0f);
+            document.add(new PdfPTable(tabel));
             tabel.addCell("No");
             tabel.addCell("Masuk");
             tabel.addCell("Keluar");
             tabel.addCell("Uraian");
+
+            jurnals = db.userDao().findByName(dateOfDay);
+            for (int i = 0; i < jurnals.size(); i++) {
+
 //            tabel.set
 
-            tabel.addCell(edtNo.getText().toString().trim());
-            tabel.addCell(tvWaktuMasuk.getText().toString().trim());
-            tabel.addCell(tvWaktuKeluar.getText().toString().trim());
-            tabel.addCell(edtUraian.getText().toString().trim());
+                tabel.addCell(String.valueOf(jurnals.get(i).getId()));
+                tabel.addCell(jurnals.get(i).getWaktu_masuk());
+                tabel.addCell(jurnals.get(i).getWaktu_keluar());
+                tabel.addCell(jurnals.get(i).getUraian());
 
+
+            }
             document.add(tabel);
+//            PdfPTable tabel = new PdfPTable(4);
+//            tabel.setPaddingTop(100.0f);
+//            document.add(new PdfPTable(tabel));
+//            tabel.addCell("No");
+//            tabel.addCell("Masuk");
+//            tabel.addCell("Keluar");
+//            tabel.addCell("Uraian");
+////            tabel.set
+//
+//            tabel.addCell(edtNo.getText().toString().trim());
+//            tabel.addCell(tvWaktuMasuk.getText().toString().trim());
+//            tabel.addCell(tvWaktuKeluar.getText().toString().trim());
+//            tabel.addCell(edtUraian.getText().toString().trim());
+//
+//            document.add(tabel);
 //            document.add(new Paragraph(""));
 //            document.add(new Chunk(lineSeparator));
 //            document.add(new Paragraph(""));
@@ -278,5 +395,6 @@ public class MainActivity extends AppCompatActivity {
         tvWaktuMasuk = findViewById(R.id.tv_waktu_masuk);
         divKetukWaktuKeluar = findViewById(R.id.div_ketuk_waktu_keluar);
         tvWaktuKeluar = findViewById(R.id.tv_waktu_keluar);
+        btnPrint = findViewById(R.id.btn_print);
     }
 }
