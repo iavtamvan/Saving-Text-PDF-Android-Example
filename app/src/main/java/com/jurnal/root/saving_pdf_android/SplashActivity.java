@@ -1,4 +1,4 @@
-package com.example.root.saving_pdf_android;
+package com.jurnal.root.saving_pdf_android;
 
 import android.content.Intent;
 import android.os.Handler;

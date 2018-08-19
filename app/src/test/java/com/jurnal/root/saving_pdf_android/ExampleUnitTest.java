@@ -1,4 +1,4 @@
-package com.example.root.saving_pdf_android;
+package com.jurnal.root.saving_pdf_android;
 
 import org.junit.Test;
 

@@ -1,4 +1,4 @@
-package com.example.root.saving_pdf_android.Room;
+package com.jurnal.root.saving_pdf_android.Room;
 
 import android.app.Application;
 import android.arch.persistence.room.Room;

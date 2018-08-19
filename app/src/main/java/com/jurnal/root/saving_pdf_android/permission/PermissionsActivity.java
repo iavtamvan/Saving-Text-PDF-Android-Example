@@ -1,4 +1,4 @@
-package com.example.root.saving_pdf_android.permission;
+package com.jurnal.root.saving_pdf_android.permission;
 
 import android.app.Activity;
 import android.content.DialogInterface;
@@ -11,7 +11,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 
-import com.example.root.saving_pdf_android.R;
+import com.jurnal.root.saving_pdf_android.R;
 
 
 public class PermissionsActivity extends AppCompatActivity {

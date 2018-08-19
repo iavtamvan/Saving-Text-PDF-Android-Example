@@ -1,4 +1,4 @@
-package com.example.root.saving_pdf_android.permission;
+package com.jurnal.root.saving_pdf_android.permission;
 
 import android.Manifest;
 import android.content.Context;

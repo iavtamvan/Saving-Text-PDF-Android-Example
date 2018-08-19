@@ -3,7 +3,7 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 26
     defaultConfig {
-        applicationId "com.example.root.saving_pdf_android"
+        applicationId "com.jurnal.root.saving_pdf_android"
         minSdkVersion 17
         targetSdkVersion 26
         versionCode 1

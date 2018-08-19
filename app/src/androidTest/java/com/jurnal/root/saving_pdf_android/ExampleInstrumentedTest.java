@@ -1,4 +1,4 @@
-package com.example.root.saving_pdf_android;
+package com.jurnal.root.saving_pdf_android;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("com.example.root.saving_pdf_android", appContext.getPackageName());
+        assertEquals("com.jurnal.root.saving_pdf_android", appContext.getPackageName());
     }
 }

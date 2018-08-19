@@ -1,4 +1,4 @@
-package com.example.root.saving_pdf_android.permission;
+package com.jurnal.root.saving_pdf_android.permission;
 
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -10,7 +10,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.support.v4.content.FileProvider;
 
-import com.example.root.saving_pdf_android.R;
+import com.jurnal.root.saving_pdf_android.R;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -22,8 +22,8 @@ import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.example.root.saving_pdf_android.permission.LogUtils.LOGD;
-import static com.example.root.saving_pdf_android.permission.LogUtils.LOGE;
+import static com.jurnal.root.saving_pdf_android.permission.LogUtils.LOGD;
+import static com.jurnal.root.saving_pdf_android.permission.LogUtils.LOGE;
 
 /**
  * Created by k2 on 30/6/17.

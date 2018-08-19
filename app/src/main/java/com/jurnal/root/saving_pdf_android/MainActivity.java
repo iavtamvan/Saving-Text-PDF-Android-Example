@@ -1,4 +1,4 @@
-package com.example.root.saving_pdf_android;
+package com.jurnal.root.saving_pdf_android;
 
 import android.app.TimePickerDialog;
 import android.content.ActivityNotFoundException;
@@ -18,10 +18,10 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
-import com.example.root.saving_pdf_android.Room.Jurnal;
-import com.example.root.saving_pdf_android.permission.FileUtils;
-import com.example.root.saving_pdf_android.permission.PermissionsActivity;
-import com.example.root.saving_pdf_android.permission.PermissionsChecker;
+import com.jurnal.root.saving_pdf_android.Room.Jurnal;
+import com.jurnal.root.saving_pdf_android.permission.FileUtils;
+import com.jurnal.root.saving_pdf_android.permission.PermissionsActivity;
+import com.jurnal.root.saving_pdf_android.permission.PermissionsChecker;
 import com.facebook.stetho.Stetho;
 import com.facebook.stetho.okhttp3.StethoInterceptor;
 import com.itextpdf.text.BaseColor;
@@ -52,10 +52,10 @@ import java.util.Random;
 
 import okhttp3.OkHttpClient;
 
-import static com.example.root.saving_pdf_android.Room.MyApp.db;
-import static com.example.root.saving_pdf_android.permission.LogUtils.LOGE;
-import static com.example.root.saving_pdf_android.permission.PermissionsActivity.PERMISSION_REQUEST_CODE;
-import static com.example.root.saving_pdf_android.permission.PermissionsChecker.REQUIRED_PERMISSION;
+import static com.jurnal.root.saving_pdf_android.Room.MyApp.db;
+import static com.jurnal.root.saving_pdf_android.permission.LogUtils.LOGE;
+import static com.jurnal.root.saving_pdf_android.permission.PermissionsActivity.PERMISSION_REQUEST_CODE;
+import static com.jurnal.root.saving_pdf_android.permission.PermissionsChecker.REQUIRED_PERMISSION;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -332,13 +332,13 @@ public class MainActivity extends AppCompatActivity {
 
             PdfPTable tabel = new PdfPTable(4);
             tabel.setPaddingTop(100.0f);
-//            tabel.setHorizontalAlignment(Element.ALIGN_CENTER);
-//            tabel.setWidths(new int[]{400});
             document.add(new PdfPTable(tabel));
-            tabel.addCell("            No");
-            tabel.addCell("     Waktu Masuk");
-            tabel.addCell("     Waktu Keluar");
-            tabel.addCell("         Uraian");
+            tabel.setTotalWidth(new float[]{15,50,50,150});
+            tabel.setHorizontalAlignment(Element.ALIGN_CENTER);
+            tabel.addCell("No");
+            tabel.addCell("Waktu Masuk");
+            tabel.addCell("Waktu Keluar");
+            tabel.addCell("                             Uraian");
 
 
             jurnals = db.userDao().findByName(dateOfDay);
