@@ -19,6 +19,7 @@ public class SplashActivity extends AppCompatActivity {
             public void run() {
                 // TODO CODE SOMETING, SOMEONE, SOME etc.
                 startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                finish();
             }
         }, 2000);
     }

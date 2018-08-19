@@ -9,6 +9,7 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.format.DateFormat;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -109,7 +110,11 @@ public class MainActivity extends AppCompatActivity {
         year = (String) DateFormat.format("yyyy", date); // 2013
         dateOfDay = day + "-" + monthString + "-" + year;
         jurnals = new ArrayList<>();
-
+        if (checker.lacksPermissions(REQUIRED_PERMISSION)) {
+            PermissionsActivity.startActivityForResult(MainActivity.this, PERMISSION_REQUEST_CODE, REQUIRED_PERMISSION);
+        } else {
+            Log.d("", "onCreate: sukses perm");
+        }
 
         divKetukWaktuMasuk.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -144,33 +149,37 @@ public class MainActivity extends AppCompatActivity {
         btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                jurnal = new Jurnal();
-                jurnal.setWaktu_masuk(tvWaktuMasuk.getText().toString().trim());
-                jurnal.setWaktu_keluar(tvWaktuKeluar.getText().toString().trim());
-                jurnal.setTanggal(dateOfDay);
-                jurnal.setUraian(edtUraian.getText().toString().trim());
-                db.userDao().insertAll(jurnal);
-                tvWaktuMasuk.setText("Ketuk untuk menentukan waktu");
-                tvWaktuKeluar.setText("Ketuk untuk menentukan waktu");
-                edtUraian.setText("");
+                if (tvWaktuKeluar.getText().toString().equalsIgnoreCase("ketuk untuk menentukan waktu") ||
+                        tvWaktuKeluar.getText().toString().equalsIgnoreCase("ketuk untuk menentukan waktu") ||
+                        edtUraian.getText().toString().isEmpty()){
+                    Toast.makeText(MainActivity.this, "Lengkapi data dahulu", Toast.LENGTH_SHORT).show();
+                } else {
+                    jurnal = new Jurnal();
+                    jurnal.setWaktu_masuk(tvWaktuMasuk.getText().toString().trim());
+                    jurnal.setWaktu_keluar(tvWaktuKeluar.getText().toString().trim());
+                    jurnal.setTanggal(dateOfDay);
+                    jurnal.setUraian(edtUraian.getText().toString().trim());
+                    db.userDao().insertAll(jurnal);
+                    tvWaktuMasuk.setText("Ketuk untuk menentukan waktu");
+                    tvWaktuKeluar.setText("Ketuk untuk menentukan waktu");
+                    edtUraian.setText("");
+                }
+
 
             }
         });
         btnPrint.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (checker.lacksPermissions(REQUIRED_PERMISSION)) {
-                    PermissionsActivity.startActivityForResult(MainActivity.this, PERMISSION_REQUEST_CODE, REQUIRED_PERMISSION);
-                } else {
+//                if (tvWaktuKeluar.getText().toString().equalsIgnoreCase("ketuk untuk menentukan waktu") ||
+//                        tvWaktuKeluar.getText().toString().equalsIgnoreCase("ketuk untuk menentukan waktu") ||
+//                        edtUraian.getText().toString().isEmpty()){
+//                    Toast.makeText(MainActivity.this, "Lengkapi data dahulu", Toast.LENGTH_SHORT).show();
+//                }
+//                else {
+                    createPdf(FileUtils.getAppPath(mContext) + dateOfDay + " " + tvWaktuMasuk.getText().toString().trim() + ".pdf");
+//                }
 
-//                    if (tvWaktuMasuk.getText().toString().equalsIgnoreCase("ketuk untuk menentukan waktu") && tvWaktuKeluar.getText().toString().equalsIgnoreCase("ketuk untuk menentukan waktu")){
-//                        kosong = "-";
-//                    }
-//                    else {
-//
-//                    }
-                    createPdf(FileUtils.getAppPath(mContext) + tvWaktuMasuk.getText().toString().trim() + ".pdf");
-                }
             }
         });
 
@@ -299,7 +308,7 @@ public class MainActivity extends AppCompatActivity {
 
             // Fields of Order Details...
             Font mOrderIdValueFont = new Font(urName, 15.0f, Font.NORMAL, BaseColor.BLACK);
-            Chunk mOrderIdValueChunk = new Chunk("JOURNAL HARIAN", mOrderIdValueFont);
+            Chunk mOrderIdValueChunk = new Chunk("JURNAL HARIAN", mOrderIdValueFont);
             Paragraph mOrderIdValueParagraph = new Paragraph(mOrderIdValueChunk);
             mOrderIdValueParagraph.setAlignment(Element.ALIGN_CENTER);
             document.add(mOrderIdValueParagraph);
@@ -323,11 +332,14 @@ public class MainActivity extends AppCompatActivity {
 
             PdfPTable tabel = new PdfPTable(4);
             tabel.setPaddingTop(100.0f);
+//            tabel.setHorizontalAlignment(Element.ALIGN_CENTER);
+//            tabel.setWidths(new int[]{400});
             document.add(new PdfPTable(tabel));
-            tabel.addCell("No");
-            tabel.addCell("Masuk");
-            tabel.addCell("Keluar");
-            tabel.addCell("Uraian");
+            tabel.addCell("            No");
+            tabel.addCell("     Waktu Masuk");
+            tabel.addCell("     Waktu Keluar");
+            tabel.addCell("         Uraian");
+
 
             jurnals = db.userDao().findByName(dateOfDay);
             for (int i = 0; i < jurnals.size(); i++) {
@@ -363,7 +375,7 @@ public class MainActivity extends AppCompatActivity {
 
             document.close();
 
-            Toast.makeText(mContext, "Created... :)", Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, "Berhasil", Toast.LENGTH_SHORT).show();
 
             FileUtils.openFile(mContext, new File(dest));
 
@@ -378,9 +390,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == PermissionsActivity.PERMISSIONS_GRANTED) {
-            Toast.makeText(mContext, "Permission Granted to Save", Toast.LENGTH_SHORT).show();
+            Log.d("", "onActivityResult: sukses perm");
         } else {
-            Toast.makeText(mContext, "Permission not granted, Try again!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, "Permission tidak di ijinkan. Ulangi lagi !", Toast.LENGTH_SHORT).show();
         }
     }
 
